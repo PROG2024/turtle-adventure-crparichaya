@@ -2,6 +2,7 @@
 The turtle_adventure module maintains all classes related to the Turtle's
 adventure game.
 """
+import random
 from turtle import RawTurtle
 from gamelib import Game, GameElement
 
@@ -241,35 +242,205 @@ class Enemy(TurtleGameElement):
             (self.y - self.size/2 < self.game.player.y < self.y + self.size/2)
         )
 
-
-# TODO
-# * Define your enemy classes
-# * Implement all methods required by the GameElement abstract class
-# * Define enemy's update logic in the update() method
-# * Check whether the player hits this enemy, then call the
-#   self.game.game_over_lose() method in the TurtleAdventureGame class.
-class DemoEnemy(Enemy):
-    """
-    Demo enemy
-    """
-
+class RandomWalkEnemy(Enemy):
     def __init__(self,
                  game: "TurtleAdventureGame",
                  size: int,
                  color: str):
         super().__init__(game, size, color)
+        self.__id = None
+        self.__size = size
+        self.__color = color
+        self.x = int
+        self.y = int
+        self.value_x, self.value_y = self.random()
 
     def create(self) -> None:
-        pass
+        self.__id = self.canvas.create_oval(100,100,100 + self.__size,100 +
+                                            self.__size, fill=self.__color, outline=self.__color)
 
     def update(self) -> None:
-        pass
+        self.x += 1
+        self.y += 1
+        if self.hits_player():
+            self.game.game_over_lose()
 
+        self.walking()
+        self.render()
+
+    def walking(self):
+        self.x += self.value_x
+        self.y += self.value_y
+
+        if self.x >= 800 - self.size or self.x <= 0:
+            self.value_x = -self.value_x
+        if self.y >= 500 - self.size or self.y <= 0:
+            self.value_y = -self.value_y
     def render(self) -> None:
-        pass
+        self.canvas.coords(self.__id,
+                           self.x - self.size / 2,
+                           self.y - self.size / 2,
+                           self.x + self.size / 2,
+                           self.y + self.size / 2)
+
+    def random(self):
+        value_x = random.randint(-1, 6)
+        value_y = random.randint(-1, 6)
+        return value_x, value_y
 
     def delete(self) -> None:
-        pass
+        self.canvas.delete(self.__id)
+
+class ChasingEnemy(Enemy):
+    def __init__(self,
+                 game: "TurtleAdventureGame",
+                 size: int,
+                 color: str):
+        super().__init__(game, size, color)
+        self.__game = game
+        self.__id = None
+        self.__size = size
+        self.__color = color
+        self.x = int
+        self.y = int
+
+    def create(self) -> None:
+        self.__id = self.canvas.create_oval(100, 100, 100 + self.__size, 100 +
+                                            self.__size, fill=self.__color, outline=self.__color)
+
+    def update(self) -> None:
+        # self.x += 1
+        # self.y += 1
+        x1, x2 = self.x - self.__size / 2, self.x + self.__size / 2
+        y1, y2 = self.y - self.__size / 2, self.y + self.__size / 2
+
+        player_x = self.__game.player.x
+        player_y = self.__game.player.y
+        if self.hits_player():
+            self.game.game_over_lose()
+
+        if self.x > player_x and self.y > player_y:
+            self.x -= 1
+            self.y -= 1
+        if self.x < player_x and self.y < player_y:
+            self.x += 1
+            self.y += 1
+        if self.x < player_x and self.y > player_y:
+            self.x += 1
+            self.y -= 1
+        if self.x > player_x and self.y < player_y:
+            self.x -= 1
+            self.y += 1
+
+        self.render()
+
+    def render(self) -> None:
+        self.canvas.coords(self.__id,
+                           self.x - self.size / 2,
+                           self.y - self.size / 2,
+                           self.x + self.size / 2,
+                           self.y + self.size / 2)
+
+    def delete(self) -> None:
+        self.canvas.delete(self.__id)
+
+
+class FencingEnemy(Enemy):
+    def __init__(self,
+                 game: "TurtleAdventureGame",
+                 size: int,
+                 color: str):
+        super().__init__(game, size, color)
+        self.__game = game
+        self.__id = None
+        self.__size = size
+        self.__color = color
+        self.x = int
+        self.y = int
+
+    def create(self) -> None:
+        self.__id = self.canvas.create_oval(100, 100, 100 + self.__size, 100 +
+                                            self.__size, fill=self.__color, outline=self.__color)
+    def update(self) -> None:
+        x1, x2 = self.x - self.__size / 2, self.x + self.__size / 2
+        y1, y2 = self.y - self.__size / 2, self.y + self.__size / 2
+
+        player_x = self.__game.player.x
+        player_y = self.__game.player.y
+        if self.hits_player():
+            self.game.game_over_lose()
+
+        if self.x >= self.__game.home.x + 30:
+            self.y -= 1
+        if self.y <= self.__game.home.y - 30:
+            self.x -= 1
+        if self.x <= self.__game.home.x - 30:
+            self.y += 1
+        if self.y >= self.__game.home.y + 30:
+            self.x += 1
+
+        self.render()
+    def render(self) -> None:
+        self.canvas.coords(self.__id,
+                           self.x - self.size / 2,
+                           self.y - self.size / 2,
+                           self.x + self.size / 2,
+                           self.y + self.size / 2)
+
+    def delete(self) -> None:
+        self.canvas.delete(self.__id)
+
+class SquareEnemy(Enemy):
+    def __init__(self,
+                 game: "TurtleAdventureGame",
+                 size: int,
+                 color: str):
+        super().__init__(game, size, color)
+        self.__game = game
+        self.__id = None
+        self.__size = size
+        self.__color = color
+        self.x = int
+        self.y = int
+        self.value_x, self.value_y = self.random()
+
+    def create(self) -> None:
+        self.__id = self.canvas.create_rectangle(100, 100, 100 + self.__size, 100 +
+                                            self.__size, fill=self.__color, outline=self.__color)
+
+    def update(self) -> None:
+        self.x += 1
+        self.y += 1
+        if self.hits_player():
+            self.game.game_over_lose()
+
+        self.walking()
+        self.render()
+
+    def walking(self):
+        self.x += self.value_x
+        self.y += self.value_y
+
+        if self.x >= 800 - self.size or self.x <= 0:
+            self.value_x = -self.value_x
+        if self.y >= 500 - self.size or self.y <= 0:
+            self.value_y = -self.value_y
+    def render(self) -> None:
+        self.canvas.coords(self.__id,
+                           self.x - self.size / 2,
+                           self.y - self.size / 2,
+                           self.x + self.size / 2,
+                           self.y + self.size / 2)
+
+    def random(self):
+        value_x = random.randint(-1, 6)
+        value_y = random.randint(-1, 6)
+        return value_x, value_y
+
+    def delete(self) -> None:
+        self.canvas.delete(self.__id)
+
+
 
 
 # TODO
@@ -311,10 +482,27 @@ class EnemyGenerator:
         """
         Create a new enemy, possibly based on the game level
         """
-        new_enemy = DemoEnemy(self.__game, 20, "red")
-        new_enemy.x = 100
-        new_enemy.y = 100
-        self.game.add_element(new_enemy)
+        for i in range(20):
+            random_walk_enemy = RandomWalkEnemy(self.__game, 20, "pink")
+            random_walk_enemy.x = random.randint(100,600)
+            random_walk_enemy.y = random.randint(100,600)
+            self.game.add_element(random_walk_enemy)
+        for i in range(3):
+            chasing_enemy = ChasingEnemy(self.__game, 20, "blue")
+            chasing_enemy.x = random.randint(100,600)
+            chasing_enemy.y = random.randint(100,600)
+            self.game.add_element(chasing_enemy)
+        for i in range(1):
+            fencing_enemy = FencingEnemy(self.__game, 20, "green")
+            fencing_enemy.x = self.__game.home.x + 30
+            fencing_enemy.y = self.__game.home.y + 30
+            self.game.add_element(fencing_enemy)
+        for i in range(5):
+            square_enemy = SquareEnemy(self.__game, 50, "yellow")
+            square_enemy.x = random.randint(100,600)
+            square_enemy.y = random.randint(100,600)
+            self.game.add_element(square_enemy)
+
 
 
 class TurtleAdventureGame(Game): # pylint: disable=too-many-ancestors

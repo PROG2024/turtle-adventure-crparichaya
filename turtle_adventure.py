@@ -441,16 +441,6 @@ class SquareEnemy(Enemy):
         self.canvas.delete(self.__id)
 
 
-
-
-# TODO
-# Complete the EnemyGenerator class by inserting code to generate enemies
-# based on the given game level; call TurtleAdventureGame's add_enemy() method
-# to add enemies to the game at certain points in time.
-#
-# Hint: the 'game' parameter is a tkinter's frame, so it's after()
-# method can be used to schedule some future events.
-
 class EnemyGenerator:
     """
     An EnemyGenerator instance is responsible for creating enemies of various
